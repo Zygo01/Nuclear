@@ -1,48 +1,20 @@
-pkg load data-smoothing;
-U = csvread("widmo.csv");
-#M = csvread("output.csv");
+M = csvread("output.csv");
+x = M(700:end,1);
+y = M(700:end,2);
 
-[Us, lambda] = regdatasmooth(U(1:end,1), U(1:end,2));
-M = [U(1:end,1), U(1:end,2), Us];
-csvwrite("output.csv", M);
-#{
-plot(Co60(1:end,1),Co60(1:end,2),
-     Cs137(1:end,1),Cs137(1:end,2),
-     Na22(1:end,1),Na22(1:end,2));
-axis("tight", "tic");
-set(gcf, 'PaperSize', [23.2 8.2], 'PaperPosition', [0 0 23.2 8.2])
-set (gca (), "ytick", 0:500:10000, "xtick", 0:200:8200)
-legend("Co60","Cs137","Na22");
-print ("Plots/Data.pdf");
-close();
+[pks, loc, extra] = findpeaks(y,'MinPeakHeight',75,"MinPeakDistance",150);
+loc = loc.+700;
 
-semilogy(Co60(1:end,1),Co60(1:end,2),
-     Cs137(1:end,1),Cs137(1:end,2),
-     Na22(1:end,1),Na22(1:end,2));
-axis("tight", "tic");
-set(gcf, 'PaperSize', [23.2 8.2], 'PaperPosition', [0 0 23.2 8.2])
-set (gca (), "xtick", 0:200:8200)
-legend("Co60","Cs137","Na22");
-print ("Plots/DataLOG.pdf");
-close();
+E = [184.36;240.18;293.17;349.70;606.3;764.76;1115.48;1232.94;1757.52];
+[p,s] = polyfit(loc, E, 1);
+dp=sqrt (diag (s.C)/s.df)*s.normr;
+xp=polyval(p,linspace(700, 8193, 7493));
 
-plot(Co60(210:6000,1),M(210:6000,2),
-     Cs137(210:6000,1),M(210:6000,3),
-     Na22(210:6000,1),M(210:6000,4));
-axis("tight", "tic");
-set(gcf, 'PaperSize', [23.2 8.2], 'PaperPosition', [0 0 23.2 8.2])
-set (gca (), "ytick", 0:500:10000, "xtick", 0:200:8200)
-legend("Co60","Cs137","Na22");
-print ("Plots/Smooth.pdf");
-close();
 
-semilogy(Co60(210:6000,1),abs(M(210:6000,2)),
-     Cs137(210:6000,1),abs(M(210:6000,3)),
-     Na22(210:6000,1),abs(M(210:6000,4)));
+plot(xp,y);
 axis("tight", "tic");
+axis([160, 1900, 0, 2300]);
 set(gcf, 'PaperSize', [23.2 8.2], 'PaperPosition', [0 0 23.2 8.2])
-set (gca (), "xtick", 0:200:8200)
-legend("Co60","Cs137","Na22");
-print ("Plots/SmoothLOG.pdf");
-close();
-#}
+set (gca (), "ytick", 0:200:2200, "xtick", 0:50:1900)
+print ("Plots/PeaksEnergyUnits.pdf");
+#close();
